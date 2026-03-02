@@ -58,6 +58,7 @@ jobs:
             target/${{ matrix.target }}/release/github-release-tag
             target/${{ matrix.target }}/release/github-release-tag.exe
           if-no-files-found: ignore
+          retention-days: 1
 
   release:
     needs: build

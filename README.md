@@ -2,8 +2,6 @@
 
 `github-release-tag` is a fast GitHub Action written in Rust that automatically determines the next semantic version, pushes a git tag, creates a GitHub Release, and uploads release assets.
 
-It behaves similarly to `mathieudutour/github-tag-action` and `ncipollo/release-action`, but combined into a single, high-performance step.
-
 ## Features
 
 - **Semantic Versioning:** Analyzes commit messages (Conventional Commits) since the last tag to automatically determine if a `major`, `minor`, or `patch` bump is required.
@@ -31,7 +29,7 @@ jobs:
       contents: write # Needed to push tags and create releases
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # ... (build your project and store artifacts in release_assets/ here)
 
