@@ -103,10 +103,10 @@ runs:
         TARGET_TAG="${{ github.action_ref }}"
         if [[ -z "$TARGET_TAG" || "$TARGET_TAG" == "main" || "$TARGET_TAG" == "master" ]]; then
           echo "Downloading latest release..."
-          gh release download --repo ${{ github.action_repository }} --pattern "$BINARY"
+          gh release download --repo caffeine-soft/github-release-tag --pattern "$BINARY"
         else
           echo "Downloading release for tag $TARGET_TAG..."
-          gh release download "$TARGET_TAG" --repo ${{ github.action_repository }} --pattern "$BINARY"
+          gh release download "$TARGET_TAG" --repo caffeine-soft/github-release-tag --pattern "$BINARY"
         fi
 
         mv "$BINARY" "github-release-tag${EXTENSION}"
