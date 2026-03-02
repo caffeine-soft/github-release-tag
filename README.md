@@ -1,6 +1,9 @@
-# GitHub Release Tag
+# 🏷️ GitHub Release Tag
 
-`github-release-tag` is a fast GitHub Action written in Rust that automatically determines the next semantic version, pushes a git tag, creates a GitHub Release, and uploads release assets.
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/caffeine-soft/github-release-tag?style=flat-square)](https://github.com/caffeine-soft/github-release-tag/releases)
+[![Marketplace](https://img.shields.io/badge/Marketplace-GitHub_Release_Tag-blue?style=flat-square&logo=github)](https://github.com/marketplace/actions/github-release-tag)
+
+`github-release-tag` is a blazing fast GitHub Action written in Rust 🦀 that automatically determines the next semantic version, pushes a git tag, creates a GitHub Release, and uploads release assets.
 
 ## Features
 
@@ -35,7 +38,7 @@ jobs:
 
       - name: Create Release and Upload Assets
         id: release
-        uses: your-username/github-release-tag@v1 # Replace with your repo
+        uses: caffeine-soft/github-release-tag@v0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           default_bump: "patch"

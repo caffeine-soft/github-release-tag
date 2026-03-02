@@ -1,5 +1,8 @@
 name: "GitHub Release Tag"
 description: "Creates a GitHub release tag based on conventional commits."
+branding:
+  icon: "tag"
+  color: "blue"
 
 inputs:
   github_token:
