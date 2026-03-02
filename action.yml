@@ -103,14 +103,22 @@ runs:
         TARGET_TAG="${{ github.action_ref }}"
         if [[ -z "$TARGET_TAG" || "$TARGET_TAG" == "main" || "$TARGET_TAG" == "master" ]]; then
           echo "Downloading latest release..."
-          gh release download --repo caffeine-soft/github-release-tag --pattern "$BINARY"
+          gh release download --repo caffeine-soft/github-release-tag --pattern "$BINARY" || DOWNLOAD_FAILED=true
         else
           echo "Downloading release for tag $TARGET_TAG..."
-          gh release download "$TARGET_TAG" --repo caffeine-soft/github-release-tag --pattern "$BINARY"
+          gh release download "$TARGET_TAG" --repo caffeine-soft/github-release-tag --pattern "$BINARY" || DOWNLOAD_FAILED=true
         fi
 
-        mv "$BINARY" "github-release-tag${EXTENSION}"
-        chmod +x "github-release-tag${EXTENSION}"
+        if [[ "$DOWNLOAD_FAILED" == "true" ]]; then
+          echo "Warning: Failed to download pre-compiled binary. Falling back to building from source."
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          export PATH="$HOME/.cargo/bin:$PATH"
+          cargo build --release --manifest-path ${{ github.action_path }}/Cargo.toml
+          mv ${{ github.action_path }}/target/release/github-release-tag${EXTENSION} "github-release-tag${EXTENSION}"
+        else
+          mv "$BINARY" "github-release-tag${EXTENSION}"
+          chmod +x "github-release-tag${EXTENSION}"
+        fi
 
     - name: Execute Action
       id: tag_action
