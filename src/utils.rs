@@ -34,7 +34,9 @@ pub fn get_valid_tags(tags: Vec<Tag>, tag_prefix: &str) -> Result<Vec<ParsedTag>
                     version,
                 }),
                 Err(_) => {
-                    println!("Found Invalid Tag: {}", tag.name);
+                    if version_str.parse::<u64>().is_err() {
+                        println!("Found Invalid Tag: {}", tag.name);
+                    }
                     None
                 }
             }

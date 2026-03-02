@@ -101,7 +101,10 @@ runs:
         BINARY="github-release-tag-${TARGET}${EXTENSION}"
 
         TARGET_TAG="${{ github.action_ref }}"
-        if [[ -z "$TARGET_TAG" || "$TARGET_TAG" == "main" || "$TARGET_TAG" == "master" ]]; then
+        if [[ -z "$TARGET_TAG" ]]; then
+          echo "Action locally called via uses: ./ - forcing build from source to test latest changes..."
+          DOWNLOAD_FAILED=true
+        elif [[ "$TARGET_TAG" == "main" || "$TARGET_TAG" == "master" ]]; then
           echo "Downloading latest release..."
           gh release download --repo caffeine-soft/github-release-tag --pattern "$BINARY" || DOWNLOAD_FAILED=true
         else
