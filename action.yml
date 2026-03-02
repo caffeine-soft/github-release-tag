@@ -97,13 +97,14 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github_token }}
+        ACTION_REF: ${{ github.action_ref }}
       run: |
         TARGET="${{ steps.target.outputs.target }}"
         EXTENSION=""
         if [[ "$TARGET" == *"windows"* ]]; then EXTENSION=".exe"; fi
         BINARY="github-release-tag-${TARGET}${EXTENSION}"
 
-        TARGET_TAG="${{ github.action_ref }}"
+        TARGET_TAG="$ACTION_REF"
         if [[ -z "$TARGET_TAG" ]]; then
           echo "Action locally called via uses: ./ - forcing build from source to test latest changes..."
           DOWNLOAD_FAILED=true
