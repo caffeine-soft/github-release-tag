@@ -114,8 +114,15 @@ runs:
         else
           echo "Downloading release for tag $TARGET_TAG..."
           if ! gh release download "$TARGET_TAG" --repo caffeine-soft/github-release-tag --pattern "$BINARY"; then
-            echo "Failed to download from tag $TARGET_TAG. Attempting to download from latest release..."
-            gh release download --repo caffeine-soft/github-release-tag --pattern "$BINARY" || DOWNLOAD_FAILED=true
+            echo "Failed to download from exact tag $TARGET_TAG."
+            LATEST_MATCH=$(gh release list --repo caffeine-soft/github-release-tag --exclude-drafts --limit 100 | awk -v prefix="^${TARGET_TAG}\\.|^${TARGET_TAG}\$" '$1 ~ prefix {print $1}' | head -n 1 || true)
+            if [[ -n "$LATEST_MATCH" ]]; then
+              echo "Attempting to download from matching release $LATEST_MATCH..."
+              gh release download "$LATEST_MATCH" --repo caffeine-soft/github-release-tag --pattern "$BINARY" || DOWNLOAD_FAILED=true
+            else
+              echo "No matching release found. Attempting to download from absolute latest release..."
+              gh release download --repo caffeine-soft/github-release-tag --pattern "$BINARY" || DOWNLOAD_FAILED=true
+            fi
           fi
         fi
 
