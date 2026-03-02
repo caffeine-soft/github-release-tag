@@ -1,0 +1,105 @@
+name: Build and Release Action
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            use-cross: true
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-musl
+            use-cross: true
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            use-cross: false
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            use-cross: false
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            use-cross: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install cross
+        if: matrix.use-cross
+        uses: taiki-e/install-action@cross
+
+      - name: Build Binary
+        shell: bash
+        run: |
+          if [ "${{ matrix.use-cross }}" == "true" ]; then
+            cross build --release --target ${{ matrix.target }}
+          else
+            cargo build --release --target ${{ matrix.target }}
+          fi
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: binary-${{ matrix.target }}
+          path: |
+            target/${{ matrix.target }}/release/github-release-tag
+            target/${{ matrix.target }}/release/github-release-tag.exe
+          if-no-files-found: ignore
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+
+      - name: Prepare Release Assets
+        run: |
+          mkdir -p release_assets
+          for dir in artifacts/binary-*/; do
+            target=$(basename "$dir" | sed 's/binary-//')
+            if [ -f "$dir/github-release-tag" ]; then
+              mv "$dir/github-release-tag" "release_assets/github-release-tag-$target"
+            fi
+            if [ -f "$dir/github-release-tag.exe" ]; then
+              mv "$dir/github-release-tag.exe" "release_assets/github-release-tag-$target.exe"
+            fi
+          done
+
+      - name: Create Release and Upload Assets
+        id: tag_version
+        uses: ./
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          generate_release: "true"
+          release_name: "Release {tag}"
+          artifacts: "release_assets/*"
+
+      - name: Update Major Tag
+        run: |
+          MAJOR_VERSION=$(echo "${{ steps.tag_version.outputs.new_tag }}" | cut -d. -f1)
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag -fa "$MAJOR_VERSION" -m "Update major tag $MAJOR_VERSION"
+          git push origin "$MAJOR_VERSION" --force
