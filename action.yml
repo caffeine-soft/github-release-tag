@@ -113,7 +113,10 @@ runs:
           gh release download --repo caffeine-soft/github-release-tag --pattern "$BINARY" || DOWNLOAD_FAILED=true
         else
           echo "Downloading release for tag $TARGET_TAG..."
-          gh release download "$TARGET_TAG" --repo caffeine-soft/github-release-tag --pattern "$BINARY" || DOWNLOAD_FAILED=true
+          if ! gh release download "$TARGET_TAG" --repo caffeine-soft/github-release-tag --pattern "$BINARY"; then
+            echo "Failed to download from tag $TARGET_TAG. Attempting to download from latest release..."
+            gh release download --repo caffeine-soft/github-release-tag --pattern "$BINARY" || DOWNLOAD_FAILED=true
+          fi
         fi
 
         if [[ "$DOWNLOAD_FAILED" == "true" ]]; then
