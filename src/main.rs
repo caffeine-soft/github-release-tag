@@ -85,7 +85,8 @@ async fn main() -> Result<()> {
 
     if let Some(custom) = custom_tag {
         println!("Custom tag specified. Skipping commit analysis.");
-        new_version_str = custom.clone();
+        let version_part = custom.strip_prefix(&tag_prefix).unwrap_or(&custom);
+        new_version_str = version_part.to_string();
         release_type = "custom".to_string();
     } else {
         let mut commit_messages = Vec::new();
